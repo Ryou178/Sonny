@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AXIOM — Stock Intelligence Terminal</title>
+  <title>EQUINOX — Stock Analysis Terminal</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,380 +11,589 @@
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Google Fonts: Syne (display) + JetBrains Mono (data) + DM Sans (body) -->
+  <!-- Google Fonts: Syne (display) + Space Mono (mono data) + DM Sans (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 
   <style>
     /* ─────────────────────────────────────────────
-       CSS VARIABLES & ROOT
+       CSS CUSTOM PROPERTIES & BASE THEME
     ───────────────────────────────────────────── */
     :root {
-      --bg-void:        #04060f;
-      --bg-deep:        #070d1c;
-      --bg-panel:       rgba(8, 15, 35, 0.72);
-      --bg-card:        rgba(12, 22, 50, 0.65);
-      --bg-card-hover:  rgba(16, 28, 62, 0.80);
-      --border-dim:     rgba(99, 140, 255, 0.10);
-      --border-glow:    rgba(99, 140, 255, 0.28);
-      --accent-blue:    #4d8eff;
-      --accent-blue2:   #2563eb;
-      --text-primary:   #e8eeff;
-      --text-secondary: #7a8bb5;
-      --text-muted:     #3d4f72;
-      --green-vivid:    #10f08a;
-      --green-dim:      rgba(16, 240, 138, 0.15);
-      --red-vivid:      #ff3f6c;
-      --red-dim:        rgba(255, 63, 108, 0.15);
-      --gold:           #f5c842;
-      --font-display:   'Syne', sans-serif;
-      --font-mono:      'JetBrains Mono', monospace;
-      --font-body:      'DM Sans', sans-serif;
+      --bg-deepest:    #030712;
+      --bg-deep:       #060d1f;
+      --bg-panel:      rgba(8, 18, 40, 0.72);
+      --bg-card:       rgba(12, 24, 54, 0.60);
+      --border-glow:   rgba(56, 139, 253, 0.18);
+      --border-subtle: rgba(255,255,255,0.06);
+      --accent-blue:   #3b82f6;
+      --accent-cyan:   #22d3ee;
+      --text-primary:  #e2e8f0;
+      --text-muted:    #64748b;
+      --text-dim:      #334155;
+      --positive:      #10b981;
+      --negative:      #ef4444;
+      --neutral:       #f59e0b;
+      --grid-color:    rgba(56, 139, 253, 0.04);
+      --font-display:  'Syne', sans-serif;
+      --font-mono:     'Space Mono', monospace;
+      --font-body:     'DM Sans', sans-serif;
     }
 
-    /* ─────────────────────────────────────────────
-       BASE RESET & BODY
-    ───────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-body);
-      background-color: var(--bg-void);
+    html, body {
+      background: var(--bg-deepest);
       color: var(--text-primary);
+      font-family: var(--font-body);
       min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Tech-grid background ── */
+    /* ── Tech grid background ── */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background-image:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(37, 99, 235, 0.18) 0%, transparent 70%),
-        linear-gradient(rgba(77, 142, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(77, 142, 255, 0.04) 1px, transparent 1px);
-      background-size: 100% 100%, 48px 48px, 48px 48px;
+        linear-gradient(135deg, #030a1c 0%, #050e26 40%, #030712 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, var(--grid-color) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, var(--grid-color) 40px);
+      background-blend-mode: normal;
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Subtle floating orbs */
+    /* ── Radial aurora bloom behind content ── */
     body::after {
       content: '';
       position: fixed;
-      width: 600px; height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
-      top: -200px; right: -150px;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 600px;
+      background: radial-gradient(ellipse at center,
+        rgba(59,130,246,0.07) 0%,
+        rgba(34,211,238,0.04) 40%,
+        transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
-
-    /* ── Global z-index wrapper ── */
-    #app { position: relative; z-index: 1; }
 
     /* ─────────────────────────────────────────────
        GLASSMORPHISM UTILITY
     ───────────────────────────────────────────── */
     .glass {
       background: var(--bg-card);
-      backdrop-filter: blur(18px) saturate(160%);
-      -webkit-backdrop-filter: blur(18px) saturate(160%);
-      border: 1px solid var(--border-dim);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border: 1px solid var(--border-subtle);
       border-radius: 16px;
-      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    .glass:hover {
-      border-color: var(--border-glow);
-      box-shadow: 0 0 24px rgba(77, 142, 255, 0.06), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
+
     .glass-panel {
       background: var(--bg-panel);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid var(--border-dim);
+      backdrop-filter: blur(28px) saturate(1.6);
+      -webkit-backdrop-filter: blur(28px) saturate(1.6);
+      border: 1px solid var(--border-glow);
       border-radius: 20px;
     }
 
     /* ─────────────────────────────────────────────
-       TYPOGRAPHY
+       LAYOUT WRAPPERS
     ───────────────────────────────────────────── */
-    .font-display  { font-family: var(--font-display); }
-    .font-mono     { font-family: var(--font-mono); }
-    .font-body     { font-family: var(--font-body); }
-
-    /* ─────────────────────────────────────────────
-       NAVBAR / HEADER
-    ───────────────────────────────────────────── */
-    .navbar {
-      background: rgba(4, 6, 15, 0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-dim);
+    #app {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
     }
 
-    .logo-mark {
+    /* ─────────────────────────────────────────────
+       HEADER / NAV BAR
+    ───────────────────────────────────────────── */
+    #topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+    }
+
+    .logo-lockup {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3b82f6, #22d3ee);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1rem;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(59,130,246,0.4);
+      flex-shrink: 0;
+    }
+
+    .logo-text {
       font-family: var(--font-display);
       font-weight: 800;
       font-size: 1.35rem;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #ffffff 0%, var(--accent-blue) 100%);
+      letter-spacing: 0.12em;
+      background: linear-gradient(90deg, #e2e8f0, #94a3b8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
     }
 
-    .badge {
+    .logo-sub {
       font-family: var(--font-mono);
-      font-size: 0.62rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      color: var(--accent-blue);
-      background: rgba(77, 142, 255, 0.12);
-      border: 1px solid rgba(77, 142, 255, 0.25);
-      padding: 2px 8px;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      margin-top: -4px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--positive);
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      padding: 0.35rem 0.8rem;
       border-radius: 999px;
+      letter-spacing: 0.08em;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--positive);
+      box-shadow: 0 0 6px var(--positive);
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
     }
 
     /* ─────────────────────────────────────────────
        SEARCH BAR
     ───────────────────────────────────────────── */
-    .search-wrap { position: relative; }
+    #search-section {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: center;
+    }
 
-    #searchInput {
-      font-family: var(--font-mono);
-      font-size: 0.92rem;
-      background: rgba(12, 22, 50, 0.7);
+    #search-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    #search-input {
+      width: 100%;
+      background: rgba(8,20,50,0.75);
+      backdrop-filter: blur(20px);
       border: 1px solid var(--border-glow);
       border-radius: 12px;
+      padding: 0.9rem 3.5rem 0.9rem 1.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
       color: var(--text-primary);
       outline: none;
+      letter-spacing: 0.06em;
       transition: border-color 0.2s, box-shadow 0.2s;
-      width: 320px;
-      padding: 10px 44px 10px 16px;
-    }
-    #searchInput::placeholder { color: var(--text-muted); }
-    #searchInput:focus {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 3px rgba(77, 142, 255, 0.12), 0 0 20px rgba(77, 142, 255, 0.08);
     }
 
-    .search-icon {
-      position: absolute; right: 14px; top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted); pointer-events: none;
+    #search-input::placeholder { color: var(--text-dim); }
+
+    #search-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15), 0 0 24px rgba(59,130,246,0.1);
     }
+
+    #search-btn {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, #3b82f6, #22d3ee);
+      border: none;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    #search-btn:hover { opacity: 0.85; transform: translateY(-50%) scale(1.05); }
 
     /* Autocomplete dropdown */
-    #autocompleteDropdown {
+    #autocomplete-dropdown {
       position: absolute;
-      top: calc(100% + 6px);
-      left: 0; right: 0;
-      background: rgba(8, 14, 32, 0.97);
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: rgba(6,14,36,0.96);
       backdrop-filter: blur(24px);
       border: 1px solid var(--border-glow);
       border-radius: 12px;
       overflow: hidden;
-      z-index: 9999;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(77,142,255,0.08);
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,130,246,0.08);
     }
-    #autocompleteDropdown.hidden { display: none; }
+
+    #autocomplete-dropdown.visible { display: block; }
 
     .autocomplete-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
       cursor: pointer;
       transition: background 0.15s;
-      border-bottom: 1px solid rgba(77, 142, 255, 0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
     }
+
     .autocomplete-item:last-child { border-bottom: none; }
-    .autocomplete-item:hover { background: rgba(77, 142, 255, 0.1); }
+    .autocomplete-item:hover { background: rgba(59,130,246,0.12); }
+
     .autocomplete-ticker {
       font-family: var(--font-mono);
-      font-weight: 600; font-size: 0.82rem;
-      color: var(--accent-blue);
-      min-width: 56px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      min-width: 60px;
+      letter-spacing: 0.06em;
     }
+
     .autocomplete-name {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* ─────────────────────────────────────────────
-       PRICE HERO SECTION
+       PRICE HEADER STRIP
     ───────────────────────────────────────────── */
-    .ticker-label {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      letter-spacing: 0.15em;
-      color: var(--text-muted);
-      text-transform: uppercase;
+    #price-header {
+      glass-panel;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
-    .company-name {
+
+    #price-header.visible { opacity: 1; }
+
+    .price-left { display: flex; flex-direction: column; gap: 0.25rem; }
+
+    #company-name {
       font-family: var(--font-display);
-      font-weight: 700;
       font-size: 1.6rem;
-      line-height: 1.15;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.1;
     }
-    .price-value {
+
+    #company-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-glow);
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .meta-link {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .meta-link:hover { opacity: 1; }
+
+    .price-right { text-align: right; }
+
+    #current-price {
       font-family: var(--font-mono);
       font-size: 2.8rem;
-      font-weight: 600;
-      letter-spacing: -0.03em;
+      font-weight: 700;
       line-height: 1;
+      color: var(--text-primary);
     }
-    .price-change {
+
+    #price-change {
       font-family: var(--font-mono);
       font-size: 1rem;
-      font-weight: 500;
+      margin-top: 0.3rem;
+      letter-spacing: 0.04em;
     }
 
     /* ─────────────────────────────────────────────
-       METRIC GRID CARDS
+       METRIC GRID (4-col)
     ───────────────────────────────────────────── */
-    .metric-card {
-      padding: 18px 22px;
-      display: flex; flex-direction: column; gap: 6px;
+    #metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.1s;
     }
+
+    #metric-grid.visible { opacity: 1; }
+
+    .metric-card {
+      padding: 1.1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
     .metric-label {
       font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
       color: var(--text-muted);
+      text-transform: uppercase;
     }
+
     .metric-value {
       font-family: var(--font-mono);
-      font-size: 1.22rem;
-      font-weight: 500;
+      font-size: 1.25rem;
+      font-weight: 700;
       color: var(--text-primary);
     }
 
-    /* ─────────────────────────────────────────────
-       CHART SECTION
-    ───────────────────────────────────────────── */
-    .chart-card { padding: 24px; }
-    .chart-title {
-      font-family: var(--font-display);
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      color: var(--text-secondary);
-      text-transform: uppercase;
+    .metric-sub {
+      font-size: 0.7rem;
+      color: var(--text-dim);
     }
-    #priceChartCanvas { max-height: 240px; }
 
     /* ─────────────────────────────────────────────
-       SCORE RINGS
+       MAIN BODY GRID
     ───────────────────────────────────────────── */
-    .score-card { padding: 22px 20px; text-align: center; }
-    .ring-wrap { position: relative; width: 96px; height: 96px; margin: 0 auto 12px; }
-    .ring-wrap svg { transform: rotate(-90deg); }
-    .ring-bg { fill: none; stroke: rgba(77,142,255,0.08); stroke-width: 8; }
+    #body-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.2s;
+    }
+
+    #body-grid.visible { opacity: 1; }
+
+    /* ─────────────────────────────────────────────
+       SCORE CARDS
+    ───────────────────────────────────────────── */
+    #score-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .score-card {
+      padding: 1.3rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    /* Circular ring via SVG */
+    .ring-wrap {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+    }
+
+    .ring-wrap svg {
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.06);
+      stroke-width: 5;
+    }
+
     .ring-fill {
-      fill: none; stroke-width: 8;
+      fill: none;
+      stroke-width: 5;
       stroke-linecap: round;
-      transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.5s;
+      transition: stroke-dashoffset 1s ease, stroke 0.4s ease;
     }
-    .ring-value {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
+
+    .ring-number {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-family: var(--font-mono);
-      font-size: 1.35rem;
-      font-weight: 600;
+      font-size: 1.05rem;
+      font-weight: 700;
     }
-    .score-label {
+
+    .score-info { flex: 1; }
+
+    .score-title {
       font-family: var(--font-display);
-      font-size: 0.78rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      letter-spacing: 0.06em;
-      color: var(--text-secondary);
-      text-transform: uppercase;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
     }
-    .score-sublabel {
+
+    .score-desc {
       font-size: 0.72rem;
       color: var(--text-muted);
-      margin-top: 4px;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     /* ─────────────────────────────────────────────
-       STRENGTHS ENGINE CARD
+       ENTERPRISE STRENGTHS CARD
     ───────────────────────────────────────────── */
-    .strength-item {
-      display: flex; gap: 12px; align-items: flex-start;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border-dim);
+    #strengths-card {
+      padding: 1.4rem 1.6rem;
     }
-    .strength-item:last-child { border-bottom: none; }
-    .strength-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent-blue);
-      margin-top: 7px; flex-shrink: 0;
-      box-shadow: 0 0 8px var(--accent-blue);
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.1rem;
     }
-    .strength-text {
-      font-size: 0.84rem;
+
+    .section-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .strength-bullet {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+      align-items: flex-start;
+    }
+
+    .strength-bullet:last-child { margin-bottom: 0; }
+
+    .bullet-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .bullet-text {
+      font-size: 0.78rem;
+      color: var(--text-muted);
       line-height: 1.6;
-      color: var(--text-secondary);
     }
-    .strength-text strong {
+
+    .bullet-text strong {
       color: var(--text-primary);
       font-weight: 500;
     }
 
     /* ─────────────────────────────────────────────
-       COMPANY PROFILE CARD
+       CHART AREA
     ───────────────────────────────────────────── */
-    .profile-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border-dim);
+    #chart-card {
+      padding: 1.4rem 1.6rem;
     }
-    .profile-row:last-child { border-bottom: none; }
-    .profile-key {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      min-width: 88px;
+
+    #price-chart-container {
+      position: relative;
+      height: 220px;
+      margin-top: 0.8rem;
     }
-    .profile-val {
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-    }
-    .profile-link {
-      color: var(--accent-blue);
-      text-decoration: none;
-      font-size: 0.84rem;
-    }
-    .profile-link:hover { text-decoration: underline; }
 
     /* ─────────────────────────────────────────────
        TOAST NOTIFICATION
     ───────────────────────────────────────────── */
     #toast {
-      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
-      z-index: 99999;
-      background: rgba(8, 14, 32, 0.97);
-      border: 1px solid rgba(255, 63, 108, 0.4);
-      border-radius: 12px;
-      padding: 14px 24px;
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      color: var(--red-vivid);
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(6,14,36,0.96);
       backdrop-filter: blur(20px);
-      box-shadow: 0 8px 32px rgba(255, 63, 108, 0.2);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 0.8rem 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: #fca5a5;
+      letter-spacing: 0.06em;
+      z-index: 9999;
       transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s;
       opacity: 0;
       white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
+
     #toast.show {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
@@ -393,907 +602,959 @@
     /* ─────────────────────────────────────────────
        LOADING SPINNER
     ───────────────────────────────────────────── */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(3,7,18,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #loading-overlay.active { display: flex; }
+
     .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid rgba(77,142,255,0.2);
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(59,130,246,0.15);
       border-top-color: var(--accent-blue);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: inline-block;
+      animation: spin 0.8s linear infinite;
     }
+
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ─────────────────────────────────────────────
-       SKELETON PULSE
+       EMPTY / WELCOME STATE
     ───────────────────────────────────────────── */
-    .skeleton {
-      background: linear-gradient(90deg, rgba(77,142,255,0.05) 0%, rgba(77,142,255,0.12) 50%, rgba(77,142,255,0.05) 100%);
-      background-size: 200% 100%;
-      animation: shimmer 1.6s infinite;
-      border-radius: 6px;
+    #welcome-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      transition: opacity 0.4s;
     }
-    @keyframes shimmer { to { background-position: -200% 0; } }
 
-    /* ─────────────────────────────────────────────
-       SECTION DIVIDER LINE
-    ───────────────────────────────────────────── */
-    .section-label {
+    .welcome-ticker {
       font-family: var(--font-mono);
-      font-size: 0.63rem;
+      font-size: 0.7rem;
       letter-spacing: 0.2em;
-      text-transform: uppercase;
+      color: var(--accent-cyan);
+      opacity: 0.6;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #e2e8f0 30%, #64748b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.75rem;
+    }
+
+    .welcome-sub {
+      font-size: 0.85rem;
       color: var(--text-muted);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border-dim);
+      max-width: 400px;
+      margin: 0 auto;
+      line-height: 1.7;
     }
 
     /* ─────────────────────────────────────────────
-       COLOR HELPERS
+       RESPONSIVE TWEAKS
     ───────────────────────────────────────────── */
-    .c-green { color: var(--green-vivid); }
-    .c-red   { color: var(--red-vivid); }
-    .c-blue  { color: var(--accent-blue); }
-    .c-gold  { color: var(--gold); }
-    .c-muted { color: var(--text-muted); }
-
-    /* ─────────────────────────────────────────────
-       SCROLLBAR CUSTOM
-    ───────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 4px; }
-
-    /* ─────────────────────────────────────────────
-       FADE-IN ANIMATION
-    ───────────────────────────────────────────── */
-    .fade-in {
-      animation: fadeInUp 0.5s ease both;
+    @media (max-width: 900px) {
+      #body-grid { grid-template-columns: 1fr; }
+      #metric-grid { grid-template-columns: repeat(2, 1fr); }
+      #current-price { font-size: 2rem; }
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 560px) {
+      #metric-grid { grid-template-columns: repeat(2, 1fr); }
+      #company-name { font-size: 1.2rem; }
     }
-    .delay-1 { animation-delay: 0.08s; }
-    .delay-2 { animation-delay: 0.16s; }
-    .delay-3 { animation-delay: 0.24s; }
-    .delay-4 { animation-delay: 0.32s; }
+
+    /* ── Color dynamic accents ── */
+    .positive-accent { color: var(--positive) !important; }
+    .negative-accent { color: var(--negative) !important; }
+    .neutral-accent  { color: var(--neutral)  !important; }
+
+    /* ── Divider line ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border-subtle);
+      margin: 0.75rem 0;
+    }
   </style>
 </head>
 
 <body>
-<div id="app">
 
-  <!-- ═══════════════════════════════════════════
-       NAVBAR
-  ═══════════════════════════════════════════ -->
-  <nav class="navbar sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
-    <!-- Logo -->
-    <div class="flex items-center gap-3">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="#4d8eff" stroke-width="1.5" fill="rgba(77,142,255,0.08)"/>
-        <path d="M14 7L21 11V17L14 21L7 17V11L14 7Z" fill="rgba(77,142,255,0.18)" stroke="#4d8eff" stroke-width="1"/>
-        <circle cx="14" cy="14" r="3" fill="#4d8eff"/>
-      </svg>
-      <span class="logo-mark">AXIOM</span>
-      <span class="badge">TERMINAL v2</span>
-    </div>
+  <!-- ─── LOADING OVERLAY ─── -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
 
-    <!-- Search Bar -->
-    <div class="search-wrap">
-      <input
-        id="searchInput"
-        type="text"
-        placeholder="Search ticker or company…"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <!-- Autocomplete Dropdown -->
-      <div id="autocompleteDropdown" class="hidden"></div>
-    </div>
+  <!-- ─── TOAST NOTIFICATION ─── -->
+  <div id="toast">⚠ Ticker not found or API rate limit reached.</div>
 
-    <!-- Live indicator -->
-    <div class="flex items-center gap-2">
-      <span style="width:7px;height:7px;border-radius:50%;background:var(--green-vivid);box-shadow:0 0 8px var(--green-vivid);animation:pulse 2s infinite;" class="inline-block"></span>
-      <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);">MARKET DATA</span>
-    </div>
-  </nav>
-  <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+  <!-- ─── MAIN APP ─── -->
+  <div id="app">
 
-  <!-- ═══════════════════════════════════════════
-       MAIN CONTENT
-  ═══════════════════════════════════════════ -->
-  <main class="max-w-7xl mx-auto px-6 py-8 space-y-6" id="mainContent">
-
-    <!-- ─── PRICE HERO ─── -->
-    <div id="priceHero" class="glass-panel p-6 fade-in">
-      <div class="flex flex-wrap items-start justify-between gap-6">
-
-        <!-- Left: Company identity -->
-        <div class="flex flex-col gap-2">
-          <div class="ticker-label" id="heroTicker">──────</div>
-          <div class="company-name" id="heroCompanyName">Select a Ticker</div>
-          <div id="heroMeta" class="flex items-center gap-3 mt-1">
-            <span style="font-size:0.78rem;color:var(--text-muted);">Enter a symbol above to load intelligence report</span>
-          </div>
+    <!-- ── TOP BAR ── -->
+    <div id="topbar">
+      <div class="logo-lockup">
+        <div class="logo-icon">EQ</div>
+        <div>
+          <div class="logo-text">EQUINOX</div>
+          <div class="logo-sub">STOCK INTELLIGENCE TERMINAL</div>
         </div>
-
-        <!-- Right: Price block -->
-        <div class="flex flex-col items-end gap-1">
-          <div class="price-value" id="heroPrice">—</div>
-          <div class="price-change" id="heroPriceChange">—</div>
-          <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);" id="heroDate">—</div>
-        </div>
+      </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        MARKET DATA LIVE
       </div>
     </div>
 
-    <!-- ─── METRIC GRID ─── -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 fade-in delay-1">
-      <div class="glass metric-card">
-        <div class="metric-label">Open</div>
-        <div class="metric-value" id="metricOpen">—</div>
+    <!-- ── SEARCH BAR ── -->
+    <div id="search-section">
+      <div id="search-wrapper">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search ticker or company… (e.g. AAPL, Tesla)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <!-- Search / submit button -->
+        <button id="search-btn" title="Analyse">
+          <!-- Magnifier SVG icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <!-- Autocomplete Dropdown -->
+        <div id="autocomplete-dropdown"></div>
       </div>
-      <div class="glass metric-card">
+    </div>
+
+    <!-- ── WELCOME / EMPTY STATE ── -->
+    <div id="welcome-state">
+      <div class="welcome-ticker">/ / / ENTER A SYMBOL ABOVE TO BEGIN</div>
+      <div class="welcome-title">Deep Market Intelligence</div>
+      <p class="welcome-sub">Search any publicly traded company or ticker symbol to unlock its full valuation analysis, scoring engine, and enterprise strength report.</p>
+    </div>
+
+    <!-- ── PRICE HEADER ── -->
+    <div id="price-header" class="glass-panel">
+      <div class="price-left">
+        <div id="company-name">—</div>
+        <div id="company-meta">
+          <span id="ticker-tag" class="meta-tag">—</span>
+          <span id="sector-tag" class="meta-tag">—</span>
+          <a id="website-link" class="meta-link" href="#" target="_blank" rel="noopener">↗ website</a>
+        </div>
+      </div>
+      <div class="price-right">
+        <div id="current-price">—</div>
+        <div id="price-change">—</div>
+      </div>
+    </div>
+
+    <!-- ── METRIC GRID ── -->
+    <div id="metric-grid">
+      <div class="metric-card glass">
+        <div class="metric-label">Open Price</div>
+        <div id="m-open" class="metric-value">—</div>
+        <div class="metric-sub">Today's open</div>
+      </div>
+      <div class="metric-card glass">
         <div class="metric-label">Day High</div>
-        <div class="metric-value c-green" id="metricHigh">—</div>
+        <div id="m-high" class="metric-value">—</div>
+        <div class="metric-sub">Intraday peak</div>
       </div>
-      <div class="glass metric-card">
+      <div class="metric-card glass">
         <div class="metric-label">Day Low</div>
-        <div class="metric-value c-red" id="metricLow">—</div>
+        <div id="m-low" class="metric-value">—</div>
+        <div class="metric-sub">Intraday trough</div>
       </div>
-      <div class="glass metric-card">
+      <div class="metric-card glass">
         <div class="metric-label">Volume</div>
-        <div class="metric-value" id="metricVolume">—</div>
+        <div id="m-volume" class="metric-value">—</div>
+        <div class="metric-sub">Shares traded</div>
       </div>
     </div>
 
-    <!-- ─── CHART + PROFILE (2-col) ─── -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 fade-in delay-2">
+    <!-- ── BODY GRID: Chart (left) + Scores + Strengths (right) ── -->
+    <div id="body-grid">
 
-      <!-- Chart card (2/3 width) -->
-      <div class="glass chart-card lg:col-span-2">
-        <div class="flex items-center justify-between mb-5">
-          <div>
-            <div class="chart-title">30-Day Price History</div>
-            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">Adjusted daily close · Polygon.io</div>
-          </div>
-          <div id="chartTrendBadge" style="display:none;" class="badge"></div>
-        </div>
-        <canvas id="priceChartCanvas"></canvas>
-      </div>
+      <!-- LEFT: Chart + Strengths stacked -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
 
-      <!-- Company profile (1/3 width) -->
-      <div class="glass p-5 flex flex-col gap-2">
-        <div class="chart-title mb-2">Company Profile</div>
-        <div id="profileContent">
-          <div class="profile-row">
-            <span class="profile-key">Sector</span>
-            <span class="profile-val" id="profileSector">—</span>
+        <!-- Price Sparkline Chart -->
+        <div id="chart-card" class="glass-panel">
+          <div class="section-header">
+            <div class="section-dot"></div>
+            <div class="section-title">Intraday Price Simulation</div>
           </div>
-          <div class="profile-row">
-            <span class="profile-key">Market Cap</span>
-            <span class="profile-val" id="profileMarketCap">—</span>
-          </div>
-          <div class="profile-row">
-            <span class="profile-key">Exchange</span>
-            <span class="profile-val" id="profileExchange">—</span>
-          </div>
-          <div class="profile-row">
-            <span class="profile-key">Employees</span>
-            <span class="profile-val" id="profileEmployees">—</span>
-          </div>
-          <div class="profile-row">
-            <span class="profile-key">Website</span>
-            <a href="#" id="profileWebsite" class="profile-link" target="_blank" rel="noopener">—</a>
-          </div>
-          <div class="profile-row">
-            <span class="profile-key">Type</span>
-            <span class="profile-val" id="profileType">—</span>
+          <div id="price-chart-container">
+            <canvas id="price-chart"></canvas>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- ─── SCORES PANEL ─── -->
-    <div class="section-label fade-in delay-3">Proprietary Intelligence Scores</div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 fade-in delay-3">
-
-      <!-- Score 1: Current Worthiness -->
-      <div class="glass score-card">
-        <div class="ring-wrap">
-          <svg viewBox="0 0 96 96" width="96" height="96">
-            <circle class="ring-bg" cx="48" cy="48" r="40"/>
-            <circle class="ring-fill" id="ring1Fill" cx="48" cy="48" r="40"
-              stroke="#4d8eff"
-              stroke-dasharray="251.2"
-              stroke-dashoffset="251.2"/>
-          </svg>
-          <div class="ring-value c-blue" id="score1Value">—</div>
+        <!-- Core Enterprise Strengths -->
+        <div id="strengths-card" class="glass-panel">
+          <div class="section-header">
+            <div class="section-dot" style="background:#a78bfa;box-shadow:0 0 8px #a78bfa;"></div>
+            <div class="section-title">Core Enterprise Strengths</div>
+          </div>
+          <div id="strengths-list">
+            <p style="font-size:0.75rem;color:var(--text-dim);">Load a ticker to generate enterprise analysis.</p>
+          </div>
         </div>
-        <div class="score-label">Current Worthiness</div>
-        <div class="score-sublabel">Market cap dominance + intraday price momentum hybrid</div>
+
       </div>
 
-      <!-- Score 2: Future Potential -->
-      <div class="glass score-card">
-        <div class="ring-wrap">
-          <svg viewBox="0 0 96 96" width="96" height="96">
-            <circle class="ring-bg" cx="48" cy="48" r="40"/>
-            <circle class="ring-fill" id="ring2Fill" cx="48" cy="48" r="40"
-              stroke="#10f08a"
-              stroke-dasharray="251.2"
-              stroke-dashoffset="251.2"/>
-          </svg>
-          <div class="ring-value c-green" id="score2Value">—</div>
+      <!-- RIGHT: Score Cards stacked -->
+      <div id="score-panel">
+
+        <!-- Score Card 1: Worthiness -->
+        <div class="score-card glass-panel">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 72 72" width="72" height="72">
+              <circle class="ring-bg" cx="36" cy="36" r="30"/>
+              <circle id="ring-worth" class="ring-fill" cx="36" cy="36" r="30"
+                stroke="#3b82f6"
+                stroke-dasharray="188.5"
+                stroke-dashoffset="188.5"/>
+            </svg>
+            <div id="score-worth-num" class="ring-number" style="color:#3b82f6;">0</div>
+          </div>
+          <div class="score-info">
+            <div class="score-title">Current Worthiness</div>
+            <div class="score-desc">Hybrid short-term value + market cap dominance. Leaders like AAPL/GOOGL score highest.</div>
+          </div>
         </div>
-        <div class="score-label">Future Potential</div>
-        <div class="score-sublabel">Momentum × institutional volume support index</div>
-      </div>
 
-      <!-- Score 3: Volatility Risk -->
-      <div class="glass score-card">
-        <div class="ring-wrap">
-          <svg viewBox="0 0 96 96" width="96" height="96">
-            <circle class="ring-bg" cx="48" cy="48" r="40"/>
-            <circle class="ring-fill" id="ring3Fill" cx="48" cy="48" r="40"
-              stroke="#f5c842"
-              stroke-dasharray="251.2"
-              stroke-dashoffset="251.2"/>
-          </svg>
-          <div class="ring-value c-gold" id="score3Value">—</div>
+        <!-- Score Card 2: Future Potential -->
+        <div class="score-card glass-panel">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 72 72" width="72" height="72">
+              <circle class="ring-bg" cx="36" cy="36" r="30"/>
+              <circle id="ring-future" class="ring-fill" cx="36" cy="36" r="30"
+                stroke="#22d3ee"
+                stroke-dasharray="188.5"
+                stroke-dashoffset="188.5"/>
+            </svg>
+            <div id="score-future-num" class="ring-number" style="color:#22d3ee;">0</div>
+          </div>
+          <div class="score-info">
+            <div class="score-title">Future Potential</div>
+            <div class="score-desc">Momentum from sustained positive % gains with strong institutional volume support.</div>
+          </div>
         </div>
-        <div class="score-label">Volatility / Risk</div>
-        <div class="score-sublabel" id="riskLabel">Intraday H-L spread instability gauge</div>
-      </div>
-    </div>
 
-    <!-- ─── ENTERPRISE STRENGTHS ─── -->
-    <div class="section-label fade-in delay-4">Enterprise Intelligence</div>
-
-    <div class="glass p-6 fade-in delay-4">
-      <div class="flex items-center gap-3 mb-4">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4d8eff" stroke-width="1.8">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
-        <div class="chart-title">Core Enterprise Strengths</div>
-      </div>
-      <div id="strengthsContent">
-        <div style="color:var(--text-muted);font-size:0.84rem;padding:12px 0;">
-          Load a ticker to generate the intelligence report…
+        <!-- Score Card 3: Volatility / Risk -->
+        <div class="score-card glass-panel">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 72 72" width="72" height="72">
+              <circle class="ring-bg" cx="36" cy="36" r="30"/>
+              <circle id="ring-risk" class="ring-fill" cx="36" cy="36" r="30"
+                stroke="#10b981"
+                stroke-dasharray="188.5"
+                stroke-dashoffset="188.5"/>
+            </svg>
+            <div id="score-risk-num" class="ring-number" style="color:#10b981;">0</div>
+          </div>
+          <div class="score-info">
+            <div class="score-title">Volatility / Risk</div>
+            <div class="score-desc" id="risk-desc">Instability from High-Low gap width. <span style="color:#10b981;">● Low Risk</span></div>
+          </div>
         </div>
+
+        <!-- Additional context card -->
+        <div class="glass" style="padding:1.2rem 1.4rem;">
+          <div class="section-header" style="margin-bottom:0.6rem;">
+            <div class="section-dot" style="background:var(--neutral);box-shadow:0 0 8px var(--neutral);"></div>
+            <div class="section-title">Market Cap Tier</div>
+          </div>
+          <div id="mktcap-display" style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.2rem;">—</div>
+          <div id="mktcap-tier" style="font-size:0.7rem;color:var(--text-muted);">—</div>
+        </div>
+
       </div>
-    </div>
+    </div><!-- /#body-grid -->
 
-  </main>
+  </div><!-- /#app -->
 
-  <!-- ─── FOOTER ─── -->
-  <footer class="text-center py-6" style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);letter-spacing:0.1em;border-top:1px solid var(--border-dim);">
-    AXIOM TERMINAL · DATA PROVIDED BY POLYGON.IO · FOR INFORMATIONAL PURPOSES ONLY · NOT FINANCIAL ADVICE
-  </footer>
+  <!-- ════════════════════════════════════════════
+       JAVASCRIPT — ALL APPLICATION LOGIC
+  ════════════════════════════════════════════ -->
+  <script>
+  (() => {
+    'use strict';
 
-</div><!-- /#app -->
+    /* ─────────────────────────────────────────
+       CONFIGURATION
+    ───────────────────────────────────────── */
 
-<!-- Toast -->
-<div id="toast">⚠ Ticker not found or API rate limit reached</div>
+    // ⚠️  REPLACE THE VALUE BELOW WITH YOUR POLYGON.IO API KEY
+    const API_KEY = 'iofgkt0M9pFcZKclGo1MpBZl7pqTwz8m';
 
-<!-- ═══════════════════════════════════════════════════════════════
-     JAVASCRIPT ENGINE
-═══════════════════════════════════════════════════════════════ -->
-<script>
-'use strict';
+    const BASE      = 'https://api.polygon.io';
+    const SNAP_URL  = ticker => `${BASE}/v2/snapshot/locale/us/markets/stocks/tickers/${ticker}?apiKey=${API_KEY}`;
+    const DETAIL_URL= ticker => `${BASE}/v3/reference/tickers/${ticker}?apiKey=${API_KEY}`;
+    const SEARCH_URL= query  => `${BASE}/v3/reference/tickers?search=${encodeURIComponent(query)}&active=true&limit=5&apiKey=${API_KEY}`;
 
-/* ─────────────────────────────────────────────────────
-   CONFIG — Replace YOUR_API_KEY with your Polygon.io key
-───────────────────────────────────────────────────── */
-const API_KEY = '	iofgkt0M9pFcZKclGo1MpBZl7pqTwz8m';  // ← insert your Polygon.io key here
+    /* ─────────────────────────────────────────
+       DOM REFERENCES
+    ───────────────────────────────────────── */
+    const $  = id => document.getElementById(id);
+    const el = {
+      searchInput:   $('search-input'),
+      searchBtn:     $('search-btn'),
+      dropdown:      $('autocomplete-dropdown'),
+      welcome:       $('welcome-state'),
+      priceHeader:   $('price-header'),
+      metricGrid:    $('metric-grid'),
+      bodyGrid:      $('body-grid'),
+      companyName:   $('company-name'),
+      companyMeta:   $('company-meta'),
+      tickerTag:     $('ticker-tag'),
+      sectorTag:     $('sector-tag'),
+      websiteLink:   $('website-link'),
+      currentPrice:  $('current-price'),
+      priceChange:   $('price-change'),
+      mOpen:         $('m-open'),
+      mHigh:         $('m-high'),
+      mLow:          $('m-low'),
+      mVolume:       $('m-volume'),
+      ringWorth:     $('ring-worth'),
+      ringFuture:    $('ring-future'),
+      ringRisk:      $('ring-risk'),
+      scoreWorthNum: $('score-worth-num'),
+      scoreFutureNum:$('score-future-num'),
+      scoreRiskNum:  $('score-risk-num'),
+      riskDesc:      $('risk-desc'),
+      strengthsList: $('strengths-list'),
+      mktcapDisplay: $('mktcap-display'),
+      mktcapTier:    $('mktcap-tier'),
+      toast:         $('toast'),
+      loadingOverlay:$('loading-overlay'),
+    };
 
-/* ─────────────────────────────────────────────────────
-   STATE
-───────────────────────────────────────────────────── */
-let currentChart = null;  // Chart.js instance reference
-let debounceTimer = null; // Debounce handle for autocomplete
+    /* ─────────────────────────────────────────
+       CHART INSTANCE
+    ───────────────────────────────────────── */
+    let chartInstance = null;
 
-/* ─────────────────────────────────────────────────────
-   UTILITY — format large numbers (1.2T, 4.5B, etc.)
-───────────────────────────────────────────────────── */
-function fmtLarge(n) {
-  if (!n || isNaN(n)) return '—';
-  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
-  if (n >= 1e9)  return '$' + (n / 1e9).toFixed(2) + 'B';
-  if (n >= 1e6)  return '$' + (n / 1e6).toFixed(2) + 'M';
-  return '$' + n.toFixed(2);
-}
+    /* ─────────────────────────────────────────
+       UTILITIES
+    ───────────────────────────────────────── */
 
-/* ─────────────────────────────────────────────────────
-   UTILITY — format currency price
-───────────────────────────────────────────────────── */
-function fmtPrice(n) {
-  if (!n || isNaN(n)) return '—';
-  return '$' + parseFloat(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+    /** Format a large number into readable notation */
+    const fmtLargeNumber = n => {
+      if (!n || isNaN(n)) return '—';
+      if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
+      if (n >= 1e9)  return `$${(n / 1e9).toFixed(2)}B`;
+      if (n >= 1e6)  return `$${(n / 1e6).toFixed(2)}M`;
+      return `$${n.toLocaleString()}`;
+    };
 
-/* ─────────────────────────────────────────────────────
-   UTILITY — format volume with commas
-───────────────────────────────────────────────────── */
-function fmtVol(n) {
-  if (!n || isNaN(n)) return '—';
-  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
-  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
-  return String(n);
-}
+    /** Format volume */
+    const fmtVolume = n => {
+      if (!n || isNaN(n)) return '—';
+      if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
+      if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
+      if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
+      return n.toLocaleString();
+    };
 
-/* ─────────────────────────────────────────────────────
-   UTILITY — safe numeric parse (returns 0 if NaN)
-───────────────────────────────────────────────────── */
-function safeNum(v, fallback = 0) {
-  const n = parseFloat(v);
-  return isNaN(n) ? fallback : n;
-}
+    /** Format price with 2 decimal places */
+    const fmtPrice = n => (n && !isNaN(n)) ? `$${Number(n).toFixed(2)}` : '—';
 
-/* ─────────────────────────────────────────────────────
-   UTILITY — clamp value between min and max
-───────────────────────────────────────────────────── */
-function clamp(v, min, max) {
-  return Math.max(min, Math.min(max, v));
-}
+    /** Safe number coerce – returns 0 if NaN/undefined/null */
+    const safe = v => (isNaN(parseFloat(v)) ? 0 : parseFloat(v));
 
-/* ─────────────────────────────────────────────────────
-   UTILITY — date helpers (YYYY-MM-DD)
-───────────────────────────────────────────────────── */
-function toDateStr(d) {
-  return d.toISOString().split('T')[0];
-}
+    /** Clamp to 0–100 */
+    const clamp = (v, min = 0, max = 100) => Math.max(min, Math.min(max, v));
 
-function getDateRange(days) {
-  const end = new Date();
-  // push back a day to ensure market data exists
-  end.setDate(end.getDate() - 1);
-  const start = new Date(end);
-  // Add extra buffer for weekends/holidays (×1.6)
-  start.setDate(start.getDate() - Math.round(days * 1.6));
-  return { startDate: toDateStr(start), endDate: toDateStr(end) };
-}
+    /** Show loading overlay */
+    const showLoading = () => el.loadingOverlay.classList.add('active');
+    const hideLoading = () => el.loadingOverlay.classList.remove('active');
 
-/* ─────────────────────────────────────────────────────
-   TOAST — show a brief error notification
-───────────────────────────────────────────────────── */
-let toastTimer = null;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg || '⚠ Ticker not found or API rate limit reached';
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
-}
+    /** Show toast with optional message */
+    let toastTimer = null;
+    const showToast = (msg = '⚠ Ticker not found or API rate limit reached.') => {
+      el.toast.textContent = msg;
+      el.toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.toast.classList.remove('show'), 4000);
+    };
 
-/* ─────────────────────────────────────────────────────
-   RING ANIMATION — animate SVG progress ring
-   score: 0–100, fillId: element ID of the ring circle
-   color: CSS color string
-───────────────────────────────────────────────────── */
-function animateRing(fillId, score, color) {
-  const circ = 251.2; // 2π × 40 (radius)
-  const el = document.getElementById(fillId);
-  if (!el) return;
-  const offset = circ - (clamp(score, 0, 100) / 100) * circ;
-  el.style.stroke = color;
-  el.style.strokeDashoffset = offset;
-  // Glow effect matching color
-  el.style.filter = `drop-shadow(0 0 6px ${color})`;
-}
+    /* ─────────────────────────────────────────
+       AUTOCOMPLETE SEARCH ENGINE
+    ───────────────────────────────────────── */
 
-/* ─────────────────────────────────────────────────────
-   SCORE ENGINE — compute three proprietary scores
-───────────────────────────────────────────────────── */
-function computeScores(data) {
-  const { price, open, high, low, volume, changePercent, marketCap } = data;
+    let debounceTimer = null;
 
-  // ── Score 1: Current Worthiness ──────────────────
-  // 40% intraday momentum + 60% market cap / volume dominance
-  const priceSafe  = safeNum(price, 1);
-  const openSafe   = safeNum(open, priceSafe);
-  const lowSafe    = safeNum(low, priceSafe * 0.99);
-  const highSafe   = safeNum(high, priceSafe * 1.01);
-  const range      = Math.max(highSafe - lowSafe, 0.0001);
-
-  // Intraday position: where is current price within day's range? (0–1)
-  const intradayPos = clamp((priceSafe - lowSafe) / range, 0, 1);
-  // Map to 0–40
-  const momentumComp = intradayPos * 40;
-
-  // Market cap tiers mapped to 0–60 log scale
-  const capSafe = safeNum(marketCap, 0);
-  let capScore = 0;
-  if (capSafe >= 1e12)      capScore = 60; // mega cap: 1T+
-  else if (capSafe >= 2e11) capScore = 52; // 200B+
-  else if (capSafe >= 5e10) capScore = 44; // 50B+
-  else if (capSafe >= 1e10) capScore = 36; // 10B+
-  else if (capSafe >= 1e9)  capScore = 28; // 1B+
-  else if (capSafe >= 1e8)  capScore = 18; // 100M+
-  else if (capSafe > 0)     capScore = 10;
-
-  // Volume bonus (large volume = liquidity premium)
-  const volSafe   = safeNum(volume, 0);
-  let volBonus = 0;
-  if (volSafe >= 1e8) volBonus = 3;
-  else if (volSafe >= 1e7) volBonus = 2;
-  else if (volSafe >= 1e6) volBonus = 1;
-
-  const score1 = clamp(Math.round(momentumComp + capScore + volBonus), 0, 100);
-
-  // ── Score 2: Future Potential ─────────────────────
-  // Momentum from changePercent + relative volume support
-  const cpSafe = safeNum(changePercent, 0);
-  // Map change% [-5, +5] → [0, 60]
-  const momentumScore2 = clamp(((cpSafe + 5) / 10) * 60, 0, 60);
-  // Volume component 0–40 based on daily volume tier
-  let volScore2 = 0;
-  if (volSafe >= 5e7)      volScore2 = 40;
-  else if (volSafe >= 1e7) volScore2 = 32;
-  else if (volSafe >= 1e6) volScore2 = 22;
-  else if (volSafe >= 1e5) volScore2 = 12;
-  else if (volSafe > 0)    volScore2 = 6;
-
-  const score2 = clamp(Math.round(momentumScore2 + volScore2), 0, 100);
-
-  // ── Score 3: Volatility / Risk ────────────────────
-  // Percentage gap between day high and low
-  const spreadPct = ((highSafe - lowSafe) / openSafe) * 100;
-  // Normalize: 0% spread = 0 risk, 8%+ spread = 100 risk
-  const score3 = clamp(Math.round((spreadPct / 8) * 100), 0, 100);
-
-  return { score1, score2, score3 };
-}
-
-/* ─────────────────────────────────────────────────────
-   STRENGTHS ENGINE — generate executive bullet points
-   from company data fetched from Polygon
-───────────────────────────────────────────────────── */
-function generateStrengths(ticker, details, marketData) {
-  const strengths = [];
-  const name = details.name || ticker;
-  const cap  = safeNum(details.market_cap, 0);
-  const vol  = safeNum(marketData.volume, 0);
-  const cp   = safeNum(marketData.changePercent, 0);
-  const employees = safeNum(details.total_employees, 0);
-  const sector  = details.sic_description || details.type || 'sector';
-  const exchange= details.primary_exchange || '';
-
-  // ── Strength 1: Market Capitalization / Scale ────
-  if (cap >= 1e12) {
-    strengths.push({
-      title: 'Global Valuation Dominance',
-      text: `With a market capitalization exceeding <strong>${fmtLarge(cap)}</strong>, ${name} commands a position among the world's most valuable enterprises, conferring unparalleled institutional credibility and balance-sheet optionality.`
+    /**
+     * Fire autocomplete fetch with 320ms debounce to
+     * avoid hammering the Polygon free-tier rate limit.
+     */
+    el.searchInput.addEventListener('input', () => {
+      const q = el.searchInput.value.trim();
+      clearTimeout(debounceTimer);
+      if (q.length < 1) { closeDropdown(); return; }
+      debounceTimer = setTimeout(() => fetchAutocomplete(q), 320);
     });
-  } else if (cap >= 1e11) {
-    strengths.push({
-      title: 'Large-Cap Market Leadership',
-      text: `A market capitalization of <strong>${fmtLarge(cap)}</strong> places ${name} firmly within large-cap territory, signaling durable operational scale and resilience against macro volatility.`
-    });
-  } else if (cap >= 1e9) {
-    strengths.push({
-      title: 'Mid-Cap Growth Architecture',
-      text: `At <strong>${fmtLarge(cap)}</strong> in market value, ${name} sits at an inflection point where institutional capital begins to deploy systematically, driving improved price discovery and liquidity profile.`
-    });
-  } else {
-    strengths.push({
-      title: 'Emerging Capital Formation',
-      text: `${name}'s current capitalization reflects an early-stage growth narrative—representing elevated upside potential for investors with appropriate risk tolerance and longer time horizons.`
-    });
-  }
 
-  // ── Strength 2: Liquidity / Volume ──────────────
-  if (vol >= 5e7) {
-    strengths.push({
-      title: 'Exceptional Marketplace Liquidity',
-      text: `Session volume of <strong>${fmtVol(vol)} shares</strong> signals extraordinary institutional participation and broad retail interest, ensuring tight bid-ask spreads and frictionless position execution at any scale.`
-    });
-  } else if (vol >= 5e6) {
-    strengths.push({
-      title: 'Strong Institutional Volume Support',
-      text: `Robust daily volume of <strong>${fmtVol(vol)} shares</strong> indicates sustained institutional engagement, providing healthy market depth and confirming continued buying interest across ${exchange ? exchange + '-listed ' : ''}shares.`
-    });
-  } else {
-    strengths.push({
-      title: 'Niche Volume Profile',
-      text: `Trading at <strong>${fmtVol(vol)} shares</strong> per session, ${name} maintains a tighter, more selective investor base—often characteristic of names with concentrated institutional ownership and lower short-term noise.`
-    });
-  }
-
-  // ── Strength 3: Momentum / Trend ────────────────
-  if (cp > 2) {
-    strengths.push({
-      title: 'Bullish Technical Momentum',
-      text: `A daily gain of <strong>+${cp.toFixed(2)}%</strong> reflects decisive bullish conviction from market participants, with price action breaking higher on above-average breadth—a signal historically associated with trend continuation.`
-    });
-  } else if (cp > 0) {
-    strengths.push({
-      title: 'Constructive Price Recovery',
-      text: `A positive session return of <strong>+${cp.toFixed(2)}%</strong> demonstrates buyer resilience and sustained demand at current valuation levels, building on a constructive near-term technical setup.`
-    });
-  } else if (cp < -2) {
-    strengths.push({
-      title: 'Tactical Dislocation Opportunity',
-      text: `A drawdown of <strong>${cp.toFixed(2)}%</strong> may represent a tactical repricing from elevated levels, historically creating attractive entry windows for conviction-driven long investors in fundamentally strong names.`
-    });
-  } else {
-    strengths.push({
-      title: 'Defensive Consolidation Pattern',
-      text: `Price action of <strong>${cp.toFixed(2)}%</strong> indicates a controlled consolidation phase, typically a precursor to directional resolution. Patient accumulation during such compression periods often precedes impulsive expansions.`
-    });
-  }
-
-  // ── Render ────────────────────────────────────────
-  const container = document.getElementById('strengthsContent');
-  container.innerHTML = strengths.map(s => `
-    <div class="strength-item">
-      <div class="strength-dot"></div>
-      <div>
-        <div style="font-family:var(--font-display);font-size:0.82rem;font-weight:600;color:var(--text-primary);margin-bottom:4px;">${s.title}</div>
-        <div class="strength-text">${s.text}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-/* ─────────────────────────────────────────────────────
-   CHART — render historical price chart using Chart.js
-───────────────────────────────────────────────────── */
-function renderChart(labels, prices, isPositive) {
-  const ctx = document.getElementById('priceChartCanvas').getContext('2d');
-
-  // Destroy existing chart before re-creating
-  if (currentChart) {
-    currentChart.destroy();
-    currentChart = null;
-  }
-
-  const lineColor   = isPositive ? '#10f08a' : '#ff3f6c';
-  const fillColor0  = isPositive ? 'rgba(16,240,138,0.28)' : 'rgba(255,63,108,0.28)';
-  const fillColor1  = isPositive ? 'rgba(16,240,138,0.00)' : 'rgba(255,63,108,0.00)';
-
-  // Gradient fill
-  const gradient = ctx.createLinearGradient(0, 0, 0, 240);
-  gradient.addColorStop(0, fillColor0);
-  gradient.addColorStop(1, fillColor1);
-
-  currentChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Close',
-        data: prices,
-        borderColor: lineColor,
-        borderWidth: 2.5,
-        tension: 0.4,           // smooth bezier
-        fill: true,
-        backgroundColor: gradient,
-        pointRadius: 0,         // hide dots for cleanliness
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: lineColor,
-        pointHoverBorderColor: '#fff',
-        pointHoverBorderWidth: 2,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(8,14,32,0.95)',
-          borderColor: 'rgba(77,142,255,0.3)',
-          borderWidth: 1,
-          titleFont: { family: "'JetBrains Mono', monospace", size: 11 },
-          bodyFont:  { family: "'JetBrains Mono', monospace", size: 12 },
-          titleColor: '#7a8bb5',
-          bodyColor: '#e8eeff',
-          padding: 10,
-          callbacks: {
-            label: ctx => ' $' + ctx.parsed.y.toFixed(2)
-          }
+    /** Fetch ticker suggestions from Polygon reference endpoint */
+    async function fetchAutocomplete(query) {
+      try {
+        const res  = await fetch(SEARCH_URL(query));
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          renderDropdown(data.results);
+        } else {
+          closeDropdown();
         }
-      },
-      scales: {
-        x: {
-          grid:  { color: 'rgba(77,142,255,0.05)' },
-          ticks: {
-            color: '#3d4f72',
-            font: { family: "'JetBrains Mono', monospace", size: 9 },
-            maxTicksLimit: 8,
-            maxRotation: 0
-          },
-          border: { color: 'rgba(77,142,255,0.08)' }
-        },
-        y: {
-          position: 'right',
-          grid:  { color: 'rgba(77,142,255,0.05)' },
-          ticks: {
-            color: '#3d4f72',
-            font: { family: "'JetBrains Mono', monospace", size: 9 },
-            callback: v => '$' + v.toFixed(0)
-          },
-          border: { color: 'rgba(77,142,255,0.08)' }
-        }
+      } catch (e) {
+        closeDropdown();
       }
     }
-  });
 
-  // Chart trend badge
-  const badge = document.getElementById('chartTrendBadge');
-  badge.style.display = 'inline-block';
-  badge.style.color = lineColor;
-  badge.style.background = isPositive ? 'rgba(16,240,138,0.1)' : 'rgba(255,63,108,0.1)';
-  badge.style.borderColor = isPositive ? 'rgba(16,240,138,0.3)' : 'rgba(255,63,108,0.3)';
-  badge.textContent = isPositive ? '▲ 30D TREND UP' : '▼ 30D TREND DOWN';
-}
+    /** Render autocomplete items */
+    function renderDropdown(results) {
+      el.dropdown.innerHTML = '';
+      results.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+        div.innerHTML = `
+          <span class="autocomplete-ticker">${item.ticker || ''}</span>
+          <span class="autocomplete-name">${item.name || ''}</span>
+        `;
+        div.addEventListener('click', () => {
+          el.searchInput.value = item.ticker;
+          closeDropdown();
+          loadTicker(item.ticker);
+        });
+        el.dropdown.appendChild(div);
+      });
+      el.dropdown.classList.add('visible');
+    }
 
-/* ─────────────────────────────────────────────────────
-   UPDATE UI — populate all dashboard sections
-───────────────────────────────────────────────────── */
-function updateDashboard(ticker, snapshotData, detailsData, aggBars) {
-  const price        = safeNum(snapshotData.day?.c || snapshotData.prevDay?.c, 0);
-  const open         = safeNum(snapshotData.day?.o || snapshotData.prevDay?.o, 0);
-  const high         = safeNum(snapshotData.day?.h || snapshotData.prevDay?.h, 0);
-  const low          = safeNum(snapshotData.day?.l  || snapshotData.prevDay?.l, 0);
-  const volume       = safeNum(snapshotData.day?.v  || snapshotData.prevDay?.v, 0);
-  const changeAmt    = safeNum(snapshotData.todaysChange,  0);
-  const changePercent= safeNum(snapshotData.todaysChangePerc, 0);
-  const marketCap    = safeNum(detailsData.market_cap, 0);
-  const isPositive   = changePercent >= 0;
+    /** Close the autocomplete dropdown */
+    function closeDropdown() {
+      el.dropdown.classList.remove('visible');
+      el.dropdown.innerHTML = '';
+    }
 
-  // ── Hero ─────────────────────────────────────────
-  document.getElementById('heroTicker').textContent = ticker;
-  document.getElementById('heroCompanyName').textContent = detailsData.name || ticker;
-  document.getElementById('heroPrice').textContent = fmtPrice(price);
-  document.getElementById('heroPrice').className = 'price-value ' + (isPositive ? 'c-green' : 'c-red');
-
-  const sign = isPositive ? '+' : '';
-  document.getElementById('heroPriceChange').textContent =
-    `${sign}${fmtPrice(changeAmt).replace('$','')}  (${sign}${changePercent.toFixed(2)}%)`;
-  document.getElementById('heroPriceChange').className = 'price-change ' + (isPositive ? 'c-green' : 'c-red');
-
-  const now = new Date();
-  document.getElementById('heroDate').textContent =
-    now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }) +
-    ' · NYSE/NASDAQ';
-
-  // Hero meta tags
-  const sector = detailsData.sic_description || detailsData.type || '';
-  document.getElementById('heroMeta').innerHTML = `
-    ${sector ? `<span style="font-size:0.78rem;color:var(--text-muted);background:rgba(77,142,255,0.08);padding:2px 10px;border-radius:999px;border:1px solid rgba(77,142,255,0.15);">${sector}</span>` : ''}
-    ${detailsData.primary_exchange ? `<span style="font-size:0.78rem;color:var(--text-muted);">${detailsData.primary_exchange}</span>` : ''}
-    ${marketCap ? `<span style="font-size:0.78rem;color:var(--text-muted);">Cap: ${fmtLarge(marketCap)}</span>` : ''}
-  `;
-
-  // ── Metric Grid ───────────────────────────────────
-  document.getElementById('metricOpen').textContent   = fmtPrice(open);
-  document.getElementById('metricHigh').textContent   = fmtPrice(high);
-  document.getElementById('metricLow').textContent    = fmtPrice(low);
-  document.getElementById('metricVolume').textContent = fmtVol(volume);
-
-  // ── Company Profile ───────────────────────────────
-  document.getElementById('profileSector').textContent    = detailsData.sic_description || detailsData.type || '—';
-  document.getElementById('profileMarketCap').textContent = fmtLarge(marketCap);
-  document.getElementById('profileExchange').textContent  = detailsData.primary_exchange || '—';
-  document.getElementById('profileEmployees').textContent = detailsData.total_employees
-    ? parseInt(detailsData.total_employees).toLocaleString() : '—';
-  const websiteEl = document.getElementById('profileWebsite');
-  if (detailsData.homepage_url) {
-    websiteEl.href = detailsData.homepage_url;
-    websiteEl.textContent = detailsData.homepage_url.replace(/^https?:\/\//,'').replace(/\/$/,'');
-  } else {
-    websiteEl.textContent = '—';
-    websiteEl.removeAttribute('href');
-  }
-  document.getElementById('profileType').textContent = detailsData.type || '—';
-
-  // ── Chart ─────────────────────────────────────────
-  if (aggBars && aggBars.length > 1) {
-    const labels = aggBars.map(b => {
-      const d = new Date(b.t);
-      return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    /** Close dropdown when clicking outside */
+    document.addEventListener('click', e => {
+      if (!$('search-wrapper').contains(e.target)) closeDropdown();
     });
-    const prices = aggBars.map(b => b.c);
-    const firstClose = prices[0];
-    const lastClose  = prices[prices.length - 1];
-    renderChart(labels, prices, lastClose >= firstClose);
-  }
 
-  // ── Scores ────────────────────────────────────────
-  const { score1, score2, score3 } = computeScores({
-    price, open, high, low, volume, changePercent, marketCap
-  });
+    /** Search button click */
+    el.searchBtn.addEventListener('click', () => {
+      const ticker = el.searchInput.value.trim().toUpperCase();
+      if (ticker) { closeDropdown(); loadTicker(ticker); }
+    });
 
-  document.getElementById('score1Value').textContent = score1;
-  document.getElementById('score2Value').textContent = score2;
-  document.getElementById('score3Value').textContent = score3;
+    /** Enter key support */
+    el.searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const ticker = el.searchInput.value.trim().toUpperCase();
+        if (ticker) { closeDropdown(); loadTicker(ticker); }
+      }
+    });
 
-  // Animate rings
-  animateRing('ring1Fill', score1, '#4d8eff');
-  animateRing('ring2Fill', score2, '#10f08a');
+    /* ─────────────────────────────────────────
+       MAIN DATA LOAD FUNCTION
+    ───────────────────────────────────────── */
 
-  // Risk coloring
-  let riskColor, riskText;
-  if (score3 <= 35)       { riskColor = '#10f08a'; riskText = 'Low Risk'; }
-  else if (score3 <= 65)  { riskColor = '#f5c842'; riskText = 'Moderate Risk'; }
-  else                    { riskColor = '#ff3f6c'; riskText = 'High Risk'; }
+    /**
+     * Primary function that orchestrates all Polygon API calls
+     * for a given ticker symbol, then populates the entire dashboard.
+     */
+    async function loadTicker(ticker) {
+      ticker = ticker.toUpperCase().trim();
+      if (!ticker) return;
 
-  animateRing('ring3Fill', score3, riskColor);
-  document.getElementById('score3Value').style.color = riskColor;
-  document.getElementById('riskLabel').textContent = `${riskText} · Intraday H-L spread instability gauge`;
-  document.getElementById('riskLabel').style.color = riskColor;
+      showLoading();
 
-  // ── Strengths Engine ──────────────────────────────
-  generateStrengths(ticker, detailsData, { volume, changePercent, marketCap });
+      try {
+        // ── Parallel fetch: snapshot (price data) + company details ──
+        const [snapRes, detailRes] = await Promise.all([
+          fetch(SNAP_URL(ticker)),
+          fetch(DETAIL_URL(ticker)),
+        ]);
 
-  // ── Persist last ticker ───────────────────────────
-  try { localStorage.setItem('axiom_last_ticker', ticker); } catch(e) {}
-}
+        const snapData   = await snapRes.json();
+        const detailData = await detailRes.json();
 
-/* ─────────────────────────────────────────────────────
-   FETCH — Main stock data orchestrator
-   Fires three Polygon calls in parallel then updates UI
-───────────────────────────────────────────────────── */
-async function fetchStockData(ticker) {
-  ticker = ticker.trim().toUpperCase();
-  if (!ticker) return;
+        // ── Validate snapshot response ──
+        if (!snapData.ticker || !snapData.ticker.day) {
+          throw new Error('No snapshot data');
+        }
 
-  // Close autocomplete
-  document.getElementById('autocompleteDropdown').classList.add('hidden');
+        const snap    = snapData.ticker;
+        const day     = snap.day   || {};
+        const prevDay = snap.prevDay || {};
+        const details = detailData.results || {};
 
-  // Loading state: dim values
-  document.getElementById('heroTicker').textContent = ticker;
-  document.getElementById('heroCompanyName').innerHTML =
-    '<span class="skeleton" style="width:220px;height:28px;display:inline-block;"></span>';
-  document.getElementById('heroPrice').textContent = '…';
-  document.getElementById('heroPriceChange').textContent = '';
+        // ── Extract core price metrics ──
+        const currentPrice = safe(snap.lastTrade?.p || snap.lastQuote?.P || day.c || prevDay.c);
+        const openPrice    = safe(day.o  || prevDay.o);
+        const highPrice    = safe(day.h  || prevDay.h);
+        const lowPrice     = safe(day.l  || prevDay.l);
+        const volume       = safe(day.v  || prevDay.v);
+        const changeAmt    = safe(snap.todaysChange);
+        const changePct    = safe(snap.todaysChangePerc);
 
-  const { startDate, endDate } = getDateRange(30);
+        // ── Company info from detail endpoint ──
+        const companyFullName = details.name           || ticker;
+        const sector          = details.sic_description || details.type || 'Equity';
+        const website         = details.homepage_url   || '#';
+        const marketCap       = safe(details.market_cap);
+        const description     = details.description    || '';
 
-  try {
-    // Three concurrent API calls
-    const [snapshotRes, detailsRes, aggsRes] = await Promise.all([
-      fetch(`https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${ticker}?apiKey=${API_KEY}`),
-      fetch(`https://api.polygon.io/v3/reference/tickers/${ticker}?apiKey=${API_KEY}`),
-      fetch(`https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${startDate}/${endDate}?adjusted=true&sort=asc&limit=50&apiKey=${API_KEY}`)
-    ]);
+        /* ── Save to localStorage for state persistence ── */
+        localStorage.setItem('equinox_last_ticker', ticker);
 
-    // Parse JSON
-    const [snapshotJson, detailsJson, aggsJson] = await Promise.all([
-      snapshotRes.json(), detailsRes.json(), aggsRes.json()
-    ]);
+        /* ── Hide welcome, reveal sections ── */
+        el.welcome.style.display = 'none';
+        el.priceHeader.classList.add('visible');
+        el.metricGrid.classList.add('visible');
+        el.bodyGrid.classList.add('visible');
 
-    // Validate snapshot
-    if (!snapshotJson.ticker || snapshotJson.status === 'ERROR' || snapshotJson.error) {
-      throw new Error(snapshotJson.error || 'Ticker not found');
+        /* ── PRICE HEADER ── */
+        el.companyName.textContent  = companyFullName;
+        el.tickerTag.textContent    = ticker;
+        el.sectorTag.textContent    = sector;
+        el.websiteLink.href         = website.startsWith('http') ? website : `https://${website}`;
+        el.websiteLink.textContent  = '↗ ' + (website.replace(/https?:\/\//,'').split('/')[0] || 'website');
+        el.currentPrice.textContent = fmtPrice(currentPrice);
+
+        // Color-code change based on positive/negative
+        const isPositive = changePct >= 0;
+        const changeColor = isPositive ? '#10b981' : '#ef4444';
+        const changeSign  = isPositive ? '+' : '';
+        el.priceChange.innerHTML = `
+          <span style="color:${changeColor};font-weight:700;">
+            ${changeSign}${fmtPrice(changeAmt)} (${changeSign}${changePct.toFixed(2)}%)
+          </span>
+        `;
+        el.currentPrice.style.color = changeColor;
+
+        /* ── METRIC GRID ── */
+        el.mOpen.textContent   = fmtPrice(openPrice);
+        el.mHigh.textContent   = fmtPrice(highPrice);
+        el.mLow.textContent    = fmtPrice(lowPrice);
+        el.mVolume.textContent = fmtVolume(volume);
+
+        /* ── MARKET CAP CARD ── */
+        el.mktcapDisplay.textContent = fmtLargeNumber(marketCap);
+        el.mktcapTier.textContent    = getCapTier(marketCap);
+
+        /* ── PROPRIETARY SCORES ── */
+        const worthScore   = calcWorthinessScore(currentPrice, openPrice, lowPrice, marketCap, volume);
+        const futureScore  = calcFutureScore(changePct, volume, prevDay.v);
+        const riskScore    = calcRiskScore(highPrice, lowPrice, currentPrice);
+
+        animateRing('ring-worth',  'score-worth-num',  worthScore,  getRingColor(worthScore,  false));
+        animateRing('ring-future', 'score-future-num', futureScore, getRingColor(futureScore, false));
+        animateRing('ring-risk',   'score-risk-num',   riskScore,   getRingColor(riskScore,   true));
+
+        // Update risk descriptor text
+        updateRiskLabel(riskScore);
+
+        /* ── ENTERPRISE STRENGTHS ── */
+        renderStrengths(companyFullName, ticker, marketCap, volume, changePct, sector, description, currentPrice, openPrice);
+
+        /* ── CHART (simulated intraday sparkline from day data) ── */
+        renderChart(openPrice, highPrice, lowPrice, currentPrice, isPositive);
+
+      } catch (err) {
+        console.error('[EQUINOX] API Error:', err);
+        showToast('⚠ Ticker not found or API rate limit reached.');
+      } finally {
+        hideLoading();
+      }
     }
 
-    const snapshotData = snapshotJson.ticker;
-    const detailsData  = detailsJson.results || {};
-    const aggBars      = aggsJson.results   || [];
+    /* ─────────────────────────────────────────
+       PROPRIETARY SCORING FORMULAS
+    ───────────────────────────────────────── */
 
-    // Populate dashboard
-    updateDashboard(ticker, snapshotData, detailsData, aggBars);
+    /**
+     * CURRENT WORTHINESS SCORE (0–100)
+     * ─ 40% weight: short-term pricing trend relative to Open & Low
+     * ─ 60% weight: market cap + volume dominance
+     * Mega-cap leaders score dramatically higher.
+     */
+    function calcWorthinessScore(price, open, low, marketCap, volume) {
+      // 40% — Short-term momentum: how much above low vs open spread
+      let priceMomentum = 0;
+      const openSafe = safe(open) || safe(price);
+      const lowSafe  = safe(low)  || safe(price) * 0.99;
+      const spread   = openSafe - lowSafe;
+      if (spread > 0) {
+        priceMomentum = clamp(((safe(price) - lowSafe) / spread) * 100, 0, 100);
+      } else {
+        priceMomentum = 50;
+      }
 
-  } catch (err) {
-    console.error('[AXIOM] Fetch error:', err.message);
-    showToast('⚠ Ticker not found or API rate limit reached');
+      // 60% — Market cap dominance (logarithmic scale)
+      // $1T+ → ~100, $100B → ~80, $10B → ~60, $1B → ~40, <$1B → ~20
+      let capScore = 0;
+      const cap = safe(marketCap);
+      if      (cap >= 1e12)  capScore = clamp(80 + (Math.log10(cap / 1e12) * 20), 80, 100);
+      else if (cap >= 1e11)  capScore = 70 + (Math.log10(cap / 1e11) * 10);
+      else if (cap >= 1e10)  capScore = 55 + (Math.log10(cap / 1e10) * 15);
+      else if (cap >= 1e9)   capScore = 40 + (Math.log10(cap / 1e9)  * 15);
+      else if (cap >= 1e8)   capScore = 25 + (Math.log10(cap / 1e8)  * 15);
+      else if (cap > 0)      capScore = 10 + (Math.log10(cap / 1e7)  * 7.5);
+      else                   capScore = 30; // Unknown cap, neutral
 
-    // Reset hero to idle state
-    document.getElementById('heroTicker').textContent     = '——';
-    document.getElementById('heroCompanyName').textContent= 'Failed to load';
-    document.getElementById('heroPrice').textContent      = '—';
-    document.getElementById('heroPriceChange').textContent= err.message;
-  }
-}
+      // Volume boost: high volume relative to average adds up to +5 pts
+      const volBoost = Math.min(5, (safe(volume) / 1e7) * 2);
 
-/* ─────────────────────────────────────────────────────
-   AUTOCOMPLETE — debounced search as user types
-───────────────────────────────────────────────────── */
-async function fetchAutocomplete(query) {
-  if (!query || query.length < 1) {
-    document.getElementById('autocompleteDropdown').classList.add('hidden');
-    return;
-  }
-
-  try {
-    const res  = await fetch(
-      `https://api.polygon.io/v3/reference/tickers?search=${encodeURIComponent(query)}&active=true&limit=6&apiKey=${API_KEY}`
-    );
-    const json = await res.json();
-    const results = json.results || [];
-
-    const dropdown = document.getElementById('autocompleteDropdown');
-
-    if (!results.length) {
-      dropdown.classList.add('hidden');
-      return;
+      const final = (priceMomentum * 0.40) + (capScore * 0.60) + volBoost;
+      return clamp(Math.round(final), 0, 100);
     }
 
-    dropdown.innerHTML = results.map(r => `
-      <div class="autocomplete-item"
-           data-ticker="${r.ticker}"
-           onclick="selectTicker('${r.ticker}')">
-        <span class="autocomplete-ticker">${r.ticker}</span>
-        <span class="autocomplete-name">${r.name || '—'}</span>
-      </div>
-    `).join('');
+    /**
+     * FUTURE POTENTIAL SCORE (0–100)
+     * Combines today's % change (momentum) with relative volume signal
+     */
+    function calcFutureScore(changePct, todayVol, prevVol) {
+      // Momentum component: +5% change → high score; negative → low
+      const changeRaw = safe(changePct);
+      let momentumScore = 50 + clamp(changeRaw * 4, -50, 50);
 
-    dropdown.classList.remove('hidden');
+      // Relative volume: today vs previous day
+      const prevVolSafe = safe(prevVol) || 1;
+      const relVol      = safe(todayVol) / prevVolSafe;
+      let   volScore    = clamp(relVol * 50, 0, 100);
 
-  } catch (err) {
-    console.warn('[AXIOM] Autocomplete error:', err.message);
-    document.getElementById('autocompleteDropdown').classList.add('hidden');
-  }
-}
+      // If no volume data, neutral
+      if (!todayVol || !prevVol) volScore = 50;
 
-/* ─────────────────────────────────────────────────────
-   SELECT TICKER — from autocomplete click
-───────────────────────────────────────────────────── */
-function selectTicker(ticker) {
-  document.getElementById('searchInput').value = ticker;
-  document.getElementById('autocompleteDropdown').classList.add('hidden');
-  fetchStockData(ticker);
-}
-
-/* ─────────────────────────────────────────────────────
-   SEARCH INPUT EVENTS
-───────────────────────────────────────────────────── */
-const searchInput = document.getElementById('searchInput');
-
-// Debounce: wait 320ms after last keystroke before firing autocomplete
-searchInput.addEventListener('input', e => {
-  clearTimeout(debounceTimer);
-  const q = e.target.value.trim();
-  debounceTimer = setTimeout(() => fetchAutocomplete(q), 320);
-});
-
-// Enter key → full fetch
-searchInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    clearTimeout(debounceTimer);
-    const ticker = searchInput.value.trim().toUpperCase();
-    if (ticker) fetchStockData(ticker);
-  }
-  // Escape → close dropdown
-  if (e.key === 'Escape') {
-    document.getElementById('autocompleteDropdown').classList.add('hidden');
-  }
-});
-
-// Close dropdown on outside click
-document.addEventListener('click', e => {
-  if (!e.target.closest('.search-wrap')) {
-    document.getElementById('autocompleteDropdown').classList.add('hidden');
-  }
-});
-
-/* ─────────────────────────────────────────────────────
-   STATE PERSISTENCE — restore last ticker on load
-───────────────────────────────────────────────────── */
-(function restoreLastTicker() {
-  try {
-    const last = localStorage.getItem('axiom_last_ticker');
-    if (last) {
-      searchInput.value = last;
-      // Slight delay so DOM is fully ready
-      setTimeout(() => fetchStockData(last), 400);
+      const final = (momentumScore * 0.55) + (volScore * 0.45);
+      return clamp(Math.round(final), 0, 100);
     }
-  } catch (e) {}
-})();
 
-</script>
+    /**
+     * VOLATILITY / RISK SCORE (0–100)
+     * Derived from (High - Low) / price spread as a percentage.
+     * Colour-coded: Green 0–35, Yellow 36–65, Red 66–100
+     */
+    function calcRiskScore(high, low, price) {
+      const h = safe(high);
+      const l = safe(low);
+      const p = safe(price) || 1;
+      if (!h || !l || h <= l) return 20; // Safe default
+      const spreadPct = ((h - l) / p) * 100;
+      // Scale: 0% spread → 0 risk, 10%+ spread → ~100 risk
+      const score = clamp(Math.round(spreadPct * 10), 0, 100);
+      return score;
+    }
+
+    /** Returns colour for ring based on score and whether higher = worse */
+    function getRingColor(score, higherIsBad) {
+      if (higherIsBad) {
+        if (score <= 35) return '#10b981'; // green = low risk
+        if (score <= 65) return '#f59e0b'; // yellow = moderate
+        return '#ef4444';                  // red = high risk
+      }
+      // For positive scores: higher = better
+      if (score >= 70) return '#10b981';
+      if (score >= 40) return '#3b82f6';
+      return '#f59e0b';
+    }
+
+    /** Update risk label text and colour */
+    function updateRiskLabel(riskScore) {
+      let label, color;
+      if (riskScore <= 35) { label = '● Low Risk';      color = '#10b981'; }
+      else if (riskScore <= 65) { label = '● Moderate Risk'; color = '#f59e0b'; }
+      else { label = '● High Risk'; color = '#ef4444'; }
+      el.riskDesc.innerHTML = `Instability from High-Low gap width. <span style="color:${color};">${label}</span>`;
+    }
+
+    /* ─────────────────────────────────────────
+       RING ANIMATION
+    ───────────────────────────────────────── */
+
+    /**
+     * Animates an SVG ring to the target score value.
+     * Circumference of r=30 circle = 2π×30 ≈ 188.5
+     */
+    function animateRing(ringId, numId, score, color) {
+      const circumference = 188.5;
+      const offset = circumference - (score / 100) * circumference;
+      const ringEl = $(ringId);
+      const numEl  = $(numId);
+      if (!ringEl || !numEl) return;
+
+      ringEl.style.stroke           = color;
+      ringEl.style.strokeDashoffset = offset;
+      numEl.style.color             = color;
+
+      // Animate number counting up
+      let current = 0;
+      const target = score;
+      const step = Math.ceil(target / 40);
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        numEl.textContent = current;
+        if (current >= target) clearInterval(timer);
+      }, 20);
+    }
+
+    /* ─────────────────────────────────────────
+       MARKET CAP TIER LABEL
+    ───────────────────────────────────────── */
+    function getCapTier(cap) {
+      if (!cap || cap <= 0) return 'Market cap unavailable';
+      if (cap >= 1e12) return `Mega-Cap — Top-tier global enterprise`;
+      if (cap >= 2e11) return `Large-Cap — Major institutional holding`;
+      if (cap >= 1e10) return `Mid-Cap — Growth stage company`;
+      if (cap >= 2e9)  return `Small-Cap — Emerging market player`;
+      return `Micro/Nano Cap — Speculative growth asset`;
+    }
+
+    /* ─────────────────────────────────────────
+       ENTERPRISE STRENGTHS TEXT ENGINE
+    ───────────────────────────────────────── */
+
+    /**
+     * Reads quantitative metrics to generate 2–3 professional
+     * executive-level bullet points about the company's advantages.
+     */
+    function renderStrengths(name, ticker, marketCap, volume, changePct, sector, description, price, open) {
+      const bullets = [];
+
+      // ── Bullet 1: Market Cap / Valuation Dominance ──
+      const cap = safe(marketCap);
+      if (cap >= 1e12) {
+        bullets.push({
+          icon: '◈',
+          text: `<strong>Global Valuation Dominance:</strong> With a market capitalisation exceeding ${fmtLargeNumber(cap)}, ${name} commands institutional trust at a trillion-dollar scale — placing it among the world's most strategically irreplaceable enterprises.`
+        });
+      } else if (cap >= 1e10) {
+        bullets.push({
+          icon: '◈',
+          text: `<strong>Institutional-Grade Scale:</strong> ${name}'s ${fmtLargeNumber(cap)} market capitalisation reflects deep institutional confidence, positioning it as a significant sector benchmark within its ${sector} vertical.`
+        });
+      } else if (cap > 0) {
+        bullets.push({
+          icon: '◈',
+          text: `<strong>Emerging Valuation Profile:</strong> Carrying a market cap of ${fmtLargeNumber(cap)}, ${name} presents a compelling risk-adjusted opportunity within the ${sector} space for growth-oriented portfolios.`
+        });
+      }
+
+      // ── Bullet 2: Volume / Liquidity signal ──
+      const vol = safe(volume);
+      if (vol >= 5e7) {
+        bullets.push({
+          icon: '◉',
+          text: `<strong>Massive Marketplace Liquidity:</strong> Today's ${fmtVolume(vol)} shares traded signals extraordinary institutional and retail participation — a hallmark of deep market confidence and low slippage execution risk for large-scale positions.`
+        });
+      } else if (vol >= 5e6) {
+        bullets.push({
+          icon: '◉',
+          text: `<strong>Strong Market Liquidity:</strong> With ${fmtVolume(vol)} shares exchanged today, ${ticker} demonstrates healthy two-sided order flow and consistent buyer-seller equilibrium — reducing execution risk for institutional-scale entries.`
+        });
+      } else if (vol > 0) {
+        bullets.push({
+          icon: '◉',
+          text: `<strong>Niche Market Participant:</strong> Current trading volume of ${fmtVolume(vol)} indicates a concentrated investor base. While liquidity is lower, disciplined position sizing can still yield asymmetric upside.`
+        });
+      }
+
+      // ── Bullet 3: Momentum / Technical signal ──
+      const pct = safe(changePct);
+      const priceMomentum = safe(price) - safe(open);
+      if (pct >= 2) {
+        bullets.push({
+          icon: '▲',
+          text: `<strong>Bullish Technical Buyer Momentum:</strong> Today's ${pct.toFixed(2)}% gain reflects strong intraday buying conviction with broad market support. The current price action suggests continued upward pressure as momentum traders and algorithmic systems reinforce the move.`
+        });
+      } else if (pct > 0) {
+        bullets.push({
+          icon: '▲',
+          text: `<strong>Stable Upward Price Trajectory:</strong> A modest ${pct.toFixed(2)}% advance today demonstrates measured optimism — typically a constructive signal for swing-hold investors seeking lower-volatility exposure to sector strength.`
+        });
+      } else if (pct < -2) {
+        bullets.push({
+          icon: '▽',
+          text: `<strong>Near-Term Corrective Pressure:</strong> Today's ${Math.abs(pct).toFixed(2)}% pullback may represent a mean-reversion entry opportunity for longer-horizon investors, particularly if broader market conditions remain stable and volume compression follows.`
+        });
+      } else {
+        bullets.push({
+          icon: '◌',
+          text: `<strong>Price Consolidation Phase:</strong> ${name} is exhibiting range-bound price action today, often a precursor to directional expansion. Elevated attention to volume breakout signals or upcoming catalysts is advised.`
+        });
+      }
+
+      // ── Render bullets ──
+      el.strengthsList.innerHTML = bullets.map(b => `
+        <div class="strength-bullet">
+          <div class="bullet-icon" style="font-size:0.65rem;color:#a78bfa;">${b.icon}</div>
+          <div class="bullet-text">${b.text}</div>
+        </div>
+      `).join('');
+    }
+
+    /* ─────────────────────────────────────────
+       INTRADAY CHART (SIMULATED SPARKLINE)
+    ───────────────────────────────────────── */
+
+    /**
+     * Generates a plausible simulated intraday price path
+     * using Open, High, Low, Close as anchors.
+     * A real implementation would use Polygon's /v2/aggs endpoint.
+     */
+    function renderChart(open, high, low, close, isPositive) {
+      const accentColor  = isPositive ? '#10b981' : '#ef4444';
+      const gradientStop = isPositive ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+
+      // Generate 30 simulated tick points between open → close, passing through H/L
+      const points = generateSimulatedIntraday(open, high, low, close, 30);
+      const labels  = points.map((_, i) => {
+        const hour = 9 + Math.floor((i / 29) * 6.5);
+        const min  = Math.floor(((i / 29) * 6.5 % 1) * 60);
+        return `${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+      });
+
+      // Destroy previous chart instance
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+      const canvas = $('price-chart');
+      const ctx    = canvas.getContext('2d');
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, 200);
+      grad.addColorStop(0, isPositive ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)');
+      grad.addColorStop(1, 'transparent');
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data: points,
+            borderColor: accentColor,
+            borderWidth: 2,
+            backgroundColor: grad,
+            fill: true,
+            tension: 0.45,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            pointHoverBackgroundColor: accentColor,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(6,14,36,0.95)',
+              borderColor: 'rgba(255,255,255,0.08)',
+              borderWidth: 1,
+              titleColor: '#64748b',
+              bodyColor: accentColor,
+              titleFont: { family: "'Space Mono', monospace", size: 10 },
+              bodyFont:  { family: "'Space Mono', monospace", size: 12 },
+              callbacks: {
+                label: ctx => ` $${ctx.parsed.y.toFixed(2)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+              ticks: {
+                color: '#334155',
+                font: { family: "'Space Mono', monospace", size: 9 },
+                maxTicksLimit: 6,
+              }
+            },
+            y: {
+              position: 'right',
+              grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+              ticks: {
+                color: '#334155',
+                font: { family: "'Space Mono', monospace", size: 9 },
+                callback: v => `$${v.toFixed(2)}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /**
+     * Generates a simulated intraday path with n points.
+     * Anchors: starts at open, hits high & low roughly mid-session,
+     * finishes at close. Add small random walk noise.
+     */
+    function generateSimulatedIntraday(open, high, low, close, n) {
+      const pts = [];
+      const o = safe(open)  || 100;
+      const h = safe(high)  || o * 1.01;
+      const l = safe(low)   || o * 0.99;
+      const c = safe(close) || o;
+
+      // Seed random with stable noise
+      let seed = 42;
+      const rand = () => {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      };
+
+      for (let i = 0; i < n; i++) {
+        const t = i / (n - 1);
+        // Base path: linear interpolation from open to close
+        let base = o + (c - o) * t;
+
+        // Mid-session bulge: inject high/low roughly at 30% and 60% of day
+        const highBulge  = Math.exp(-Math.pow((t - 0.30) / 0.18, 2)) * (h - o);
+        const lowBulge   = Math.exp(-Math.pow((t - 0.60) / 0.18, 2)) * (l - o);
+        base += highBulge + lowBulge;
+
+        // Small random walk noise (±0.5% of price)
+        const noise = (rand() - 0.5) * o * 0.005;
+        pts.push(parseFloat((base + noise).toFixed(4)));
+      }
+
+      return pts;
+    }
+
+    /* ─────────────────────────────────────────
+       STATE PERSISTENCE — LOAD LAST TICKER
+    ───────────────────────────────────────── */
+
+    /**
+     * On page load, restore the last viewed ticker from localStorage.
+     * This gives users a seamless experience across sessions.
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTicker = localStorage.getItem('equinox_last_ticker');
+      if (savedTicker) {
+        el.searchInput.value = savedTicker;
+        // Small delay so DOM fully paints first
+        setTimeout(() => loadTicker(savedTicker), 300);
+      }
+    });
+
+  })(); // END IIFE
+  </script>
 </body>
 </html>
